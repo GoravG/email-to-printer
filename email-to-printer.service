@@ -1,0 +1,13 @@
+[Unit]
+Description=Email to Printer Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=%h/Documents/my-projects/pi/core/email-to-printer
+ExecStart=/bin/bash run.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
