@@ -28,33 +28,41 @@ jobs:
           else
             echo "version=$(date +'%Y.%m.%d')-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
           fi
-
+      
       - name: Build for Multiple Platforms
         run: |
-          mkdir -p releases
+          # Create platform-specific directories
+          mkdir -p releases/linux/amd64
+          mkdir -p releases/linux/arm
+          mkdir -p releases/linux/arm64
+          mkdir -p releases/macos/amd64
+          mkdir -p releases/macos/arm64
+          
           # Linux AMD64
           GOOS=linux GOARCH=amd64 go build -o email-printer ./cmd/main.go
-          tar czf releases/email-printer-linux-amd64.tar.gz email-printer
+          tar czf releases/linux/amd64/email-printer-linux-amd64.tar.gz email-printer config.yaml email-to-printer.service run.sh
           
           # Linux ARM (Raspberry Pi)
           GOOS=linux GOARCH=arm GOARM=7 go build -o email-printer ./cmd/main.go
-          tar czf releases/email-printer-linux-arm.tar.gz email-printer
+          tar czf releases/linux/arm/email-printer-linux-arm.tar.gz email-printer config.yaml email-to-printer.service run.sh
           
           # Linux ARM64
           GOOS=linux GOARCH=arm64 go build -o email-printer ./cmd/main.go
-          tar czf releases/email-printer-linux-arm64.tar.gz email-printer
+          tar czf releases/linux/arm64/email-printer-linux-arm64.tar.gz email-printer config.yaml email-to-printer.service run.sh
           
           # macOS AMD64
           GOOS=darwin GOARCH=amd64 go build -o email-printer ./cmd/main.go
-          tar czf releases/email-printer-darwin-amd64.tar.gz email-printer
+          tar czf releases/macos/amd64/email-printer-darwin-amd64.tar.gz email-printer config.yaml run.sh
           
           # macOS ARM64 (M1/M2)
           GOOS=darwin GOARCH=arm64 go build -o email-printer ./cmd/main.go
-          tar czf releases/email-printer-darwin-arm64.tar.gz email-printer
+          tar czf releases/macos/arm64/email-printer-darwin-arm64.tar.gz email-printer config.yaml run.sh
 
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
+        permissions:
+          contents: write
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -73,7 +81,7 @@ jobs:
             
             ### Downloads
             - [Linux (AMD64)](releases/linux/amd64/email-printer-linux-amd64.tar.gz)
-            - [Linux (ARM/Raspberry Pi)](releases/email-printer-linux-arm.tar.gz)
+            - [Linux (ARM/Raspberry Pi)](releases/linux/arm/email-printer-linux-arm.tar.gz)
             - [Linux (ARM64)](releases/linux/arm64/email-printer-linux-arm64.tar.gz)
             - [macOS (Intel)](releases/macos/amd64/email-printer-darwin-amd64.tar.gz)
             - [macOS (Apple Silicon)](releases/macos/arm64/email-printer-darwin-arm64.tar.gz)
