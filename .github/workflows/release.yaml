@@ -1,0 +1,87 @@
+name: Release Build
+
+on:
+  push:
+    branches:
+      - release
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "version=$(date +'%Y.%m.%d')-${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build for Multiple Platforms
+        run: |
+          mkdir -p releases
+          # Linux AMD64
+          GOOS=linux GOARCH=amd64 go build -o email-printer ./cmd/main.go
+          tar czf releases/email-printer-linux-amd64.tar.gz email-printer config.yaml email-to-printer.service run.sh
+          
+          # Linux ARM (Raspberry Pi)
+          GOOS=linux GOARCH=arm GOARM=7 go build -o email-printer ./cmd/main.go
+          tar czf releases/email-printer-linux-arm.tar.gz email-printer config.yaml email-to-printer.service run.sh
+          
+          # Linux ARM64
+          GOOS=linux GOARCH=arm64 go build -o email-printer ./cmd/main.go
+          tar czf releases/email-printer-linux-arm64.tar.gz email-printer config.yaml email-to-printer.service run.sh
+          
+          # macOS AMD64
+          GOOS=darwin GOARCH=amd64 go build -o email-printer ./cmd/main.go
+          tar czf releases/email-printer-darwin-amd64.tar.gz email-printer config.yaml run.sh
+          
+          # macOS ARM64 (M1/M2)
+          GOOS=darwin GOARCH=arm64 go build -o email-printer ./cmd/main.go
+          tar czf releases/email-printer-darwin-arm64.tar.gz email-printer config.yaml run.sh
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            releases/linux/amd64/email-printer-linux-amd64.tar.gz
+            releases/linux/arm/email-printer-linux-arm.tar.gz
+            releases/linux/arm64/email-printer-linux-arm64.tar.gz
+            releases/macos/amd64/email-printer-darwin-amd64.tar.gz
+            releases/macos/arm64/email-printer-darwin-arm64.tar.gz
+          body: |
+            ## Email to Printer ${{ steps.get_version.outputs.version }}
+            
+            ### Downloads
+            - [Linux (AMD64)](releases/linux/amd64/email-printer-linux-amd64.tar.gz)
+            - [Linux (ARM/Raspberry Pi)](releases/email-printer-linux-arm.tar.gz)
+            - [Linux (ARM64)](releases/linux/arm64/email-printer-linux-arm64.tar.gz)
+            - [macOS (Intel)](releases/macos/amd64/email-printer-darwin-amd64.tar.gz)
+            - [macOS (Apple Silicon)](releases/macos/arm64/email-printer-darwin-arm64.tar.gz)
+            
+            ### Installation
+            1. Download the appropriate version for your system
+            2. Extract the archive: `tar xzf email-printer-*.tar.gz`
+            3. Configure `config.yaml` with your settings
+            4. Run the service using the provided `run.sh` script
+            
+            For detailed instructions, see the [README.md](README.md)
