@@ -34,46 +34,27 @@ jobs:
       - name: Build for Multiple Platforms
         run: |
           # Create platform-specific directories
-          mkdir -p releases/linux/amd64
-          mkdir -p releases/linux/arm
-          mkdir -p releases/linux/arm64
-          mkdir -p releases/macos/amd64
-          mkdir -p releases/macos/arm64
+          mkdir -p releases/latest
           
           # Linux AMD64
           GOOS=linux GOARCH=amd64 go build -o email-printer ./cmd/main.go
-          mkdir -p tmp/linux/amd64
-          mv email-printer tmp/linux/amd64/
-          tar czf releases/linux/amd64/email-printer-linux-amd64.tar.gz -C tmp linux/amd64
-          rm -rf tmp/linux/amd64
+          tar czf releases/latest/email-printer-linux-amd64.tar.gz email-printer
 
           # Linux ARM (Raspberry Pi)
           GOOS=linux GOARCH=arm GOARM=7 go build -o email-printer ./cmd/main.go
-          mkdir -p tmp/linux/arm
-          mv email-printer tmp/linux/arm/
-          tar czf releases/linux/arm/email-printer-linux-arm.tar.gz -C tmp linux/arm
-          rm -rf tmp/linux/arm
+          tar czf releases/latest/email-printer-linux-arm.tar.gz email-printer
           
           # Linux ARM64
           GOOS=linux GOARCH=arm64 go build -o email-printer ./cmd/main.go
-          mkdir -p tmp/linux/arm64
-          mv email-printer tmp/linux/arm64/
-          tar czf releases/linux/arm64/email-printer-linux-arm64.tar.gz -C tmp linux/arm64
-          rm -rf tmp/linux/arm64
+          tar czf releases/latest/email-printer-linux-arm64.tar.gz email-printer
           
           # macOS AMD64
           GOOS=darwin GOARCH=amd64 go build -o email-printer ./cmd/main.go
-          mkdir -p tmp/macos/amd64
-          mv email-printer tmp/macos/amd64/
-          tar czf releases/macos/amd64/email-printer-darwin-amd64.tar.gz -C tmp macos/amd64
-          rm -rf tmp/macos/amd64
+          tar czf releases/latest/email-printer-darwin-amd64.tar.gz email-printer
           
           # macOS ARM64 (M1/M2)
           GOOS=darwin GOARCH=arm64 go build -o email-printer ./cmd/main.go
-          mkdir -p tmp/macos/arm64
-          mv email-printer tmp/macos/arm64/
-          tar czf releases/macos/arm64/email-printer-darwin-arm64.tar.gz -C tmp macos/arm64
-          rm -rf tmp/macos/arm64
+          tar czf releases/latest/email-printer-darwin-arm64.tar.gz email-printer
 
       - name: Create Release
         id: create_release
@@ -82,21 +63,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: Release ${{ steps.get_version.outputs.version }}
+          name: latest
           draft: false
           prerelease: false
           files: |
-            releases/linux/amd64/email-printer-linux-amd64.tar.gz
-            releases/linux/arm/email-printer-linux-arm.tar.gz
-            releases/linux/arm64/email-printer-linux-arm64.tar.gz
-            releases/macos/amd64/email-printer-darwin-amd64.tar.gz
-            releases/macos/arm64/email-printer-darwin-arm64.tar.gz
+            releases/latest/email-printer-linux-amd64.tar.gz
+            releases/latest/email-printer-linux-arm.tar.gz
+            releases/latest/email-printer-linux-arm64.tar.gz
+            releases/latest/email-printer-darwin-amd64.tar.gz
+            releases/latest/email-printer-darwin-arm64.tar.gz
           body: |
-            ## Email to Printer ${{ steps.get_version.outputs.version }}
+            ## Email to Printer ${{ steps.get_version.outputs.version }} (Latest)
             
             ### Downloads
-            - [Linux (AMD64)](releases/linux/amd64/email-printer-linux-amd64.tar.gz)
-            - [Linux (ARM/Raspberry Pi)](releases/linux/arm/email-printer-linux-arm.tar.gz)
-            - [Linux (ARM64)](releases/linux/arm64/email-printer-linux-arm64.tar.gz)
-            - [macOS (Intel)](releases/macos/amd64/email-printer-darwin-amd64.tar.gz)
-            - [macOS (Apple Silicon)](releases/macos/arm64/email-printer-darwin-arm64.tar.gz)
+            - [Linux (AMD64)](releases/latest/email-printer-linux-amd64.tar.gz)
+            - [Linux (ARM/Raspberry Pi)](releases/latest/email-printer-linux-arm.tar.gz)
+            - [Linux (ARM64)](releases/latest/email-printer-linux-arm64.tar.gz)
+            - [macOS (Intel)](releases/latest/email-printer-darwin-amd64.tar.gz)
+            - [macOS (Apple Silicon)](releases/latest/email-printer-darwin-arm64.tar.gz)
