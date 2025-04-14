@@ -30,16 +30,20 @@ func main() {
 		log.Error("Failed to fetch emails: %v", err)
 		os.Exit(1)
 	}
-	log.Info("Successfully fetched %d attachments", len(attachments))
-
+	if len(attachments) > 0 {
+		log.Info("Successfully fetched %d attachments", len(attachments))
+	}
+	successCount := 0
+	failureCount := 0
 	for _, att := range attachments {
 		log.Debug("Processing attachment: %s", att.Filename)
 		if err := printer.PrintFile(att.FilePath, cfg.PrinterName); err != nil {
 			log.Error("Failed to print %s: %v", att.Filename, err)
+			failureCount++
 		} else {
-			log.Info("Successfully printed file: %s", att.Filename)
+			successCount++
 		}
 	}
 
-	log.Info("Email-to-printer application completed")
+	log.Info("Email-to-printer application completed with %d successes and %d failures", successCount, failureCount)
 }
