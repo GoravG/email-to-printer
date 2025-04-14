@@ -42,23 +42,38 @@ jobs:
           
           # Linux AMD64
           GOOS=linux GOARCH=amd64 go build -o email-printer ./cmd/main.go
-          tar czf releases/linux/amd64/email-printer-linux-amd64.tar.gz email-printer
-          
+          mkdir -p tmp/linux/amd64
+          mv email-printer tmp/linux/amd64/
+          tar czf releases/linux/amd64/email-printer-linux-amd64.tar.gz -C tmp linux/amd64
+          rm -rf tmp/linux/amd64
+
           # Linux ARM (Raspberry Pi)
           GOOS=linux GOARCH=arm GOARM=7 go build -o email-printer ./cmd/main.go
-          tar czf releases/linux/arm/email-printer-linux-arm.tar.gz email-printer
+          mkdir -p tmp/linux/arm
+          mv email-printer tmp/linux/arm/
+          tar czf releases/linux/arm/email-printer-linux-arm.tar.gz -C tmp linux/arm
+          rm -rf tmp/linux/arm
           
           # Linux ARM64
           GOOS=linux GOARCH=arm64 go build -o email-printer ./cmd/main.go
-          tar czf releases/linux/arm64/email-printer-linux-arm64.tar.gz email-printer
+          mkdir -p tmp/linux/arm64
+          mv email-printer tmp/linux/arm64/
+          tar czf releases/linux/arm64/email-printer-linux-arm64.tar.gz -C tmp linux/arm64
+          rm -rf tmp/linux/arm64
           
           # macOS AMD64
           GOOS=darwin GOARCH=amd64 go build -o email-printer ./cmd/main.go
-          tar czf releases/macos/amd64/email-printer-darwin-amd64.tar.gz email-printer
+          mkdir -p tmp/macos/amd64
+          mv email-printer tmp/macos/amd64/
+          tar czf releases/macos/amd64/email-printer-darwin-amd64.tar.gz -C tmp macos/amd64
+          rm -rf tmp/macos/amd64
           
           # macOS ARM64 (M1/M2)
           GOOS=darwin GOARCH=arm64 go build -o email-printer ./cmd/main.go
-          tar czf releases/macos/arm64/email-printer-darwin-arm64.tar.gz email-printer
+          mkdir -p tmp/macos/arm64
+          mv email-printer tmp/macos/arm64/
+          tar czf releases/macos/arm64/email-printer-darwin-arm64.tar.gz -C tmp macos/arm64
+          rm -rf tmp/macos/arm64
 
       - name: Create Release
         id: create_release
