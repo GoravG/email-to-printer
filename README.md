@@ -149,11 +149,3 @@ email-to-printer/
 └── utils/
     └── logger.go       # Logging utilities
 ```
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
