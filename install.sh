@@ -140,7 +140,7 @@ imap_server: "${imap_server}"
 email: "${email}"
 password: "${password}"
 printer_name: "${printer_name}"
-debug: "${debug}"
+debug: ${debug}
 allowed_file_types:
 $(IFS=','; for type in $allowed_file_types; do echo "  - \"$type\""; done)
 allowed_senders:
